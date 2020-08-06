@@ -10,8 +10,8 @@ jobs:
         - pytest 
       - stage: pages
         script:
+        - pip install poetry
         - cd docs && make html
-        - mv build/html ../public
 
 notifications:
   email:
