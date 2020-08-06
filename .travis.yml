@@ -1,0 +1,47 @@
+os: linux
+dist:
+    - xenial
+
+addons:
+    apt:
+        update: true
+        packages:
+            - python3-pip
+            - python3-venv
+            - libenchant1c2a
+            - pandoc
+
+jobs:
+    include:
+      stage: test
+        script:
+        - pip3 install poetry
+        - export PATH=$PATH:/build/.local/bin
+        - poetry install --no-dev
+        - poetry run pip install pytest
+        - poetry run pytest
+      stage: deploy
+        script:
+        - pip3 install poetry
+        - export PATH=$PATH:/build/.local/bin
+        - rm -rf dist
+        - poetry config repositories.testpypi https://test.pypi.org/legacy/
+        - poetry config pypi-token.testpypi $PYPITEST_TOKEN
+        - poetry build
+        - poetry publish -r testpypi
+      stage: pages
+        script:
+        - pip3 install poetry
+        - export PATH=$PATH:/build/.local/bin
+        - poetry install
+        - cd docs && make html
+        - mv build/html ../public
+
+notifications:
+  email:
+    recipients:
+      - leia@ssi.gouv.fr
+    on_success: never
+    on_failure: always
+    on_pull_requests: always
+

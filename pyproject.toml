@@ -1,0 +1,42 @@
+[tool.dephell.main]
+
+[tool.poetry]
+name = "smartleia"
+version = "0.2.2"
+description = "Python toolkit for LEIA smartcard reader"
+authors = ["LEIA Team <leia@ssi.gouv.fr>"]
+license = "LGPL-2.1+"
+readme = "README.md"
+homepage = "TODO"
+repository = "TODO"
+documentation = "TODO"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+pyserial = "^3.4"
+pytest = "^5.2"
+pytest-csv = "^2.0.2"
+dephell = "^0.8.3"
+
+[tool.poetry.dev-dependencies]
+pylint = "^2.5.2"
+black = "^19.10b0"
+coverage = "^5.1"
+pytest-runner = "^5.2"
+flake8 = "^3.7.9"
+mypy = "^0.770"
+pre-commit = "^2.3.0"
+bump2version = "^1.0.0"
+sphinx = "^3.0.0"
+recommonmark = "^0.6.0"
+ipython = "^7.14.0"
+nbsphinx = "^0.7.0"
+sphinx-rtd-theme = "^0.5.0"
+"sphinxcontrib.wavedrom" = "^2.1.0"
+"sphinxcontrib.spelling" = "^5.0.0"
+pandoc = "^1.0.2"
+sphinx-autodoc-typehints = "^1.10.3"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
