@@ -24,7 +24,7 @@ if os.path.exists(readme_path):
 setup(
     long_description=readme,
     name='smartleia',
-    version='0.2.2',
+    version='1.0.0',
     description='Python toolkit for LEIA smartcard reader',
     python_requires='==3.*,>=3.7.0',
     project_urls={"documentation": "TODO", "homepage": "TODO", "repository": "TODO"},

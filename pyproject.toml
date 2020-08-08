@@ -2,7 +2,7 @@
 
 [tool.poetry]
 name = "smartleia"
-version = "0.2.2"
+version = "1.0.0"
 description = "Python toolkit for LEIA smartcard reader"
 authors = ["LEIA Team <leia@ssi.gouv.fr>"]
 license = "LGPL-2.1+"

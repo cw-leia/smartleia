@@ -9,9 +9,9 @@ jobs:
     include:
       - stage: test
         script:
+        # Test the package compilation and installation
         - pytest 
-      - stage: pages
-        script:
+        # Now test the documentation compilation
         - pip install poetry
         - cd docs && make html
 
