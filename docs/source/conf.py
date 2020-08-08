@@ -23,7 +23,7 @@ copyright = "2019-2020, ANSSI"
 author = "ANSSI"
 
 # The full version, including alpha/beta/rc tags
-release = "0.2.2"
+release = "1.0.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -35,7 +35,7 @@ extensions = [
     "sphinx_rtd_theme",
     "sphinx.ext.autodoc",
     "sphinxcontrib.wavedrom",
-    "sphinxcontrib.spelling",
+    # "sphinxcontrib.spelling",
     "sphinx.ext.napoleon",
     "sphinx_autodoc_typehints",
     # "autoapi.extension",
