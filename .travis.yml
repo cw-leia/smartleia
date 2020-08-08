@@ -11,6 +11,7 @@ jobs:
         script:
         # Test the package compilation and installation
         - pytest 
+        - pip install smartleia .
         # Now test the documentation compilation
         - pip install poetry
         - cd docs && make html
