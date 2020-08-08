@@ -10,8 +10,9 @@ jobs:
       - stage: test
         script:
         # Test the package compilation and installation
-        - pytest 
-        - python3 -m pip install smartleia
+        - pytest
+        - pip install --upgrade setuptools
+        - pip install smartleia
         # Now test the documentation compilation
         - pip install poetry
         - cd docs && make html
