@@ -11,7 +11,7 @@ script:
   # Test the package compilation and installation
   - pytest
   - pip install --upgrade setuptools
-  - pip install smartleia
+  - pip install smartleia .
 
 notifications:
   email:
