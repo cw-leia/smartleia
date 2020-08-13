@@ -13,9 +13,6 @@ jobs:
         - pytest
         - pip install --upgrade setuptools
         - pip install smartleia
-        # Now test the documentation compilation
-        - pip install poetry
-        - cd docs && make html
 
 notifications:
   email:
