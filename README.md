@@ -12,6 +12,10 @@ smart card reader. With it, you will be able to:
 5. Start a [Virtual SmartCard](https://frankmorgner.github.io/vsmartcard/) 
 client to use LEIA as a 'real' smart card reader (through PCSCD relay)
 
+The documentation dedicated to the SmartLeia package can be found [here](https://github.com/cw-leia/smartleia-doc),
+please check it to have details about the basic usage and the API for advanced
+development features.
+
 ## Dependencies
 
 You can install the requirements of the package using:
