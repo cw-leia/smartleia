@@ -7,14 +7,11 @@ python:
 install:
   pip install -r requirements.txt
 
-jobs:
-    include:
-      - stage: test
-        script:
-        # Test the package compilation and installation
-        - pytest
-        - pip install --upgrade setuptools
-        - pip install smartleia
+script:
+  # Test the package compilation and installation
+  - pytest
+  - pip install --upgrade setuptools
+  - pip install smartleia
 
 notifications:
   email:
