@@ -4,12 +4,13 @@
 
 This repository holds the source of the python package used to drive the LEIA
 smart card reader. With it, you will be able to:
-    - Connect to the LEIA board
-    - Choose parameters for the PSS/PTS negotiation
-    - Send APDUs and receive the corresponding responses
-    - Activate the DFU mode to download new firmware
-    - Start a [Virtual SmartCard](https://frankmorgner.github.io/vsmartcard/) 
-      client to use LEIA as a real smartcard reader (through PCSCD)
+
+1. Connect to the LEIA board
+2. Choose parameters for the PSS/PTS negotiation
+3. Send APDUs and receive the corresponding responses
+4. Activate the DFU mode to download new firmware
+5. Start a [Virtual SmartCard](https://frankmorgner.github.io/vsmartcard/) 
+client to use LEIA as a 'real' smart card reader (through PCSCD relay)
 
 ## Dependencies
 
