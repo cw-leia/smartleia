@@ -1,6 +1,6 @@
 language: python
 python:
-  - "3.7"
+  - "3.6"
   - "3.7"
   - "3.8"
 
@@ -10,7 +10,7 @@ install:
 script:
   # Test the package compilation and installation
   - pytest
-  - pip install smartleia .
+  - python setup.py install
 
 notifications:
   email:
