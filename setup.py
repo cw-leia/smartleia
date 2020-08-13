@@ -34,6 +34,6 @@ setup(
     packages=['smartleia'],
     package_dir={"": "."},
     package_data={"smartleia": ["*.csv", "*.ipynb"]},
-    install_requires=['dephell==0.*,>=0.8.3', 'pyserial==3.*,>=3.4.0', 'pytest==5.*,>=5.2.0', 'pytest-csv==2.*,>=2.0.2'],
-    extras_require={"dev": ["black==19.*,>=19.10.0.b0", "bump2version==1.*,>=1.0.0", "coverage==5.*,>=5.1.0", "flake8==3.*,>=3.7.9", "ipython==7.*,>=7.14.0", "mypy==0.*,>=0.770.0", "nbsphinx==0.*,>=0.7.0", "pandoc==1.*,>=1.0.2", "pre-commit==2.*,>=2.3.0", "pylint==2.*,>=2.5.2", "pytest-runner==5.*,>=5.2.0", "recommonmark==0.*,>=0.6.0", "sphinx==3.*,>=3.0.0", "sphinx-autodoc-typehints==1.*,>=1.10.3", "sphinx-rtd-theme==0.*,>=0.5.0", "sphinxcontrib.spelling==5.*,>=5.0.0", "sphinxcontrib.wavedrom==2.*,>=2.1.0"]},
+    install_requires=['pyserial==3.*,>=3.4.0', 'pytest==5.*,>=5.2.0', 'pytest-csv==2.*,>=2.0.2'],
+    extras_require={"dev": ["black==19.*,>=19.10.0.b0", "bump2version==1.*,>=1.0.0", "coverage==5.*,>=5.1.0", "flake8==3.*,>=3.7.9", "ipython==7.*,>=7.14.0", "mypy==0.*,>=0.770.0", "pre-commit==2.*,>=2.3.0", "pylint==2.*,>=2.5.2", "pytest-runner==5.*,>=5.2.0"]},
 )
