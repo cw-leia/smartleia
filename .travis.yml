@@ -10,7 +10,6 @@ install:
 script:
   # Test the package compilation and installation
   - pytest
-  - pip install --upgrade setuptools
   - pip install smartleia .
 
 notifications:
