@@ -15,6 +15,7 @@ import serial.tools.list_ports
 __all__ = [
     "TriggerPoints",
     "T",
+    "Timers",
     "Triggers",
     "TriggerStrategy",
     "create_APDU_from_bytes",
@@ -33,9 +34,13 @@ COMMAND_LEN_SIZE = 4
 RESPONSE_LEN_SIZE = 4
 TRIGGER_DEPTH = 10
 STRATEGY_MAX = 4
-# Maximum size of APDU payload size
-# NOTE: because of firmware SRAM constraints, we only
-# support this size for now.
+"""
+ Maximum size of APDU payload size is MAX_APDU_PAYLOAD_SIZE = 16384
+ This will limit extended APDUs to this size instead of normative 65kB. Supporting
+ the normative size is a future work.
+ NOTE: because of firmware SRAM constraints, we only
+ support this size for now.
+"""
 MAX_APDU_PAYLOAD_SIZE = 16384
 
 ERR_FLAGS = {0x00: "OK", 0x01: "PLATFORM_ERR_CARD_NOT_INSERTED", 0xFF: "UNKNOWN_ERROR"}
