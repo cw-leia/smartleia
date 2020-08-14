@@ -113,6 +113,14 @@ class TriggerPoints(IntFlag):
 
 
 class Timers(LEIAStructure):
+    """
+    Attributes:
+        delta_t (uint32): the global delay of the command.
+        delta_t_answer (uint32): the delay between sending the command and getting the ACK from the card.
+        
+        NOTE: usually delta_t_answer represents the acknowledgement of the smart card (often first byte of answer), while
+        delta_t represents the total andwer time. Times are in microseconds.
+    """
     _pack_ = 1
     _fields_ = [
         ("delta_t", ctypes.c_uint32),
@@ -889,7 +897,7 @@ class LEIA:
 
             self._send_command(b"O", sts)
 
-    def get_timers(self) -> ATR:
+    def get_timers(self) -> Timers:
         """
         Return the `timers` of the last command.
 
