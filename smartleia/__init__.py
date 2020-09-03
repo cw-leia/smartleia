@@ -15,7 +15,6 @@ import serial.tools.list_ports
 __all__ = [
     "TriggerPoints",
     "T",
-    "Timers",
     "Triggers",
     "TriggerStrategy",
     "create_APDU_from_bytes",
@@ -25,7 +24,7 @@ __all__ = [
     "LEIA",
 ]
 
-__version__ = "1.0.0"
+__version__ = "0.2.2"
 
 name = "smartleia"
 
@@ -34,13 +33,9 @@ COMMAND_LEN_SIZE = 4
 RESPONSE_LEN_SIZE = 4
 TRIGGER_DEPTH = 10
 STRATEGY_MAX = 4
-"""
- Maximum size of APDU payload size is MAX_APDU_PAYLOAD_SIZE = 16384
- This will limit extended APDUs to this size instead of normative 65kB. Supporting
- the normative size is a future work.
- NOTE: because of firmware SRAM constraints, we only
- support this size for now.
-"""
+# Maximum size of APDU payload size
+# NOTE: because of firmware SRAM constraints, we only
+# support this size for now.
 MAX_APDU_PAYLOAD_SIZE = 16384
 
 ERR_FLAGS = {0x00: "OK", 0x01: "PLATFORM_ERR_CARD_NOT_INSERTED", 0xFF: "UNKNOWN_ERROR"}
@@ -74,6 +69,31 @@ class ByteStruct(LEIAStructure):
     _fields_ = [("value", ctypes.c_uint8)]
 
 
+class Timers(LEIAStructure):
+    _pack_ = 1
+    _fields_ = [
+        ("delta_t", ctypes.c_uint32),
+        ("delta_t_answer", ctypes.c_uint32),
+    ]
+
+    def __init__(self, delta_t = 0, delta_t_answer = 0):
+        """
+        Create a Timers structure.
+
+        Parameters:
+            delta_t (int) : total time for the APDU.
+            delta_t_answer (int) : answer time for the APDU.
+        """
+        LEIAStructure.__init__(self, delta_t = 0, delta_t_answer = 0)
+        self.delta_t = self.delta_t_answer = 0
+
+    def __str__(self) -> str:
+        return f"""Timers(
+        delta_t={self.delta_t:d} microseconds,
+        delta_t_answer={self.delta_t_answer:d} microseconds,
+        )"""
+ 
+##### Triggers handling ######
 class TriggerPoints(IntFlag):
     """
     Class utility to reference the trigger points available.
@@ -117,52 +137,28 @@ class TriggerPoints(IntFlag):
     TRIG_IRQ_GETC = 1 << 9
 
 
-class Timers(LEIAStructure):
-    """
-    Attributes:
-        delta_t (uint32): the global delay of the command.
-        delta_t_answer (uint32): the delay between sending the command and getting the ACK from the card.
-        
-        NOTE: usually delta_t_answer represents the acknowledgement of the smart card (often first byte of answer), while
-        delta_t represents the total andwer time. Times are in microseconds.
-    """
-    _pack_ = 1
-    _fields_ = [
-        ("delta_t", ctypes.c_uint32),
-        ("delta_t_answer", ctypes.c_uint32),
-    ]
-
-    def __init__(self, delta_t = 0, delta_t_answer = 0):
-        """
-        Create a Timers structure.
-
-        Parameters:
-            delta_t (int) : total time for the APDU.
-            delta_t_answer (int) : answer time for the APDU.
-        """
-        LEIAStructure.__init__(self, delta_t = 0, delta_t_answer = 0)
-        self.delta_t = self.delta_t_answer = 0
-
-    def __str__(self) -> str:
-        return f"""Timers(
-        delta_t={self.delta_t:d} microseconds,
-        delta_t_answer={self.delta_t_answer:d} microseconds,
-        )"""
- 
-
 class Triggers(Enum):
-
-    #: Triggers after the first byte of an APDU has been sent.
-    TRIG_AFTER_1ST_BYTE_SEND_APDU = [
+    # NOTE: you can improve your trigger strategies here by adding new ones
+    # or existing ones!
+    #: Triggers at the beginning and end of ATR: first trig just before
+    # reading ATR, second trig after we have got the ATR
+    MULTI_TRIG_ATR = [
+        TriggerPoints.TRIG_GET_ATR_PRE,
+        TriggerPoints.TRIG_GET_ATR_POST,
+    ]
+    #: Triggers after the first byte of an APDU has been sent: first trig
+    # just after we have sent our APDU command, second trig when receiving
+    # the first response byte from the card.
+    MULTI_TRIG_AFTER_1ST_BYTE_SEND_APDU = [
         TriggerPoints.TRIG_PRE_SEND_APDU,
         TriggerPoints.TRIG_IRQ_PUTC,
     ]
-
+    
 
 class TriggerStrategy(LEIAStructure):
     """
     Attributes:
-        delay (int): the delay between event detection and effective trig on GPIO.
+        delay (int): the delay between event detection and effective trig on GPIO in milliseconds.
         point_list (list[int]): the list of events to match.
     """
 
@@ -170,15 +166,19 @@ class TriggerStrategy(LEIAStructure):
     _fields_ = [
         ("size", ctypes.c_uint8),
         ("delay", ctypes.c_uint32),
-        ("delay_cnt", ctypes.c_uint32),
+        ("single", ctypes.c_uint8),
         ("_list", ctypes.c_uint32 * TRIGGER_DEPTH),
+        ("_list_trigged", ctypes.c_uint32 * TRIGGER_DEPTH),
+        ("_cnt_trigged", ctypes.c_uint32 * TRIGGER_DEPTH),
+        ("_event_time", ctypes.c_uint32 * TRIGGER_DEPTH),
+        ("_apply_delay", ctypes.c_uint32 * TRIGGER_DEPTH),
     ]
 
-    def __init__(self, delay=0, point_list=None):
+    def __init__(self, delay=0, single=0, point_list=None):
         if point_list is None:
             point_list = []
 
-        LEIAStructure.__init__(self, size=0, delay=delay, delay_cnt=0)
+        LEIAStructure.__init__(self, size=0, delay=delay, single=single)
         self.point_list = point_list
 
     def _translate_point_list(self, point_list):
@@ -188,7 +188,7 @@ class TriggerStrategy(LEIAStructure):
         return list(map(lambda point: TriggerPoints(point).value, point_list))
 
     def __str__(self) -> str:
-        return f"TriggerStrategy(delay={self.delay}, point_list={self.point_list})"
+        return f"TriggerStrategy(single={self.single}, delay={self.delay}, point_list={self.point_list}, point_list_trigged={self.point_list_trigged}, cnt_list_trigged={self.cnt_list_trigged}, event_time={self.event_time_list})"
 
     @property
     def point_list(self):
@@ -212,10 +212,33 @@ class TriggerStrategy(LEIAStructure):
             self._list[i] = value[i]
         self.size = len(value)
 
+    @property
+    def point_list_trigged(self):
+        _point_list_trigged = list(self._list_trigged)[0 : self.size]
+        try:
+            r = Triggers(_point_list_trigged)
+        except Exception:
+            r = list(map(lambda i: TriggerPoints(i), _point_list_trigged))
+
+        return r
+
+    @property
+    def cnt_list_trigged(self):
+        _cnt_list_trigged = list(self._cnt_trigged)[0 : self.size]
+
+        return _cnt_list_trigged
+
+    @property
+    def event_time_list(self):
+        _event_time_list = list(self._event_time)[0 : self.size]
+
+        return _event_time_list
+
+
 
 class SetTriggerStrategy(LEIAStructure):
     _pack_ = 1
-    _fields = [("index", ctypes.c_uint8), ("strategy", TriggerStrategy)]
+    _fields_ = [("index", ctypes.c_uint8), ("strategy", TriggerStrategy)]
 
     def __str__(self) -> str:
         return f"SetTriggerStrategy(index={self.index}, strategy={self.strategy})"
@@ -866,6 +889,9 @@ class LEIA:
         """
 
         with self.lock:
+            if SID >= STRATEGY_MAX:
+                raise Exception("get_trigger_strategy: asked SID=%d exceeds STRATEGY_MAX=%d" % (SID, STRATEGY_MAX))
+           
             self._send_command(b"o", ByteStruct(SID))
 
             r_size = self._read_response_size()
@@ -874,7 +900,7 @@ class LEIA:
         return r
 
     def set_trigger_strategy(
-        self, SID: int, point_list: Union[int, List[int]], delay: int = 0
+        self, SID: int, point_list: Union[int, List[int]], delay: int = 0, single: int = 0
     ):
         """
         Set and activate a trigger strategy.
@@ -882,27 +908,24 @@ class LEIA:
         Parameters:
             SID: the strategy bank ID to use.
             point_list: the sequence to match for the trigger.
-            delay: the delay between the moment of the detection and the moment where the trigger is actually set high.
+            delay: the delay (in milliseconds) between the moment of the detection and the moment where the trigger is actually set high.
         """
 
         with self.lock:
+            if SID >= STRATEGY_MAX:
+                raise Exception("get_trigger_strategy: asked SID=%d exceeds STRATEGY_MAX=%d" % (SID, STRATEGY_MAX))
+
             if isinstance(point_list, int):
                 size = 1
                 point_list = [point_list]
 
             size = len(point_list)
 
-            sts = SetTriggerStrategy()
-            sts.index = SID
-            sts.strategy.size = size
-            for i in range(size):
-                sts.strategy.list[i] = point_list[i]
-
-            sts.strategy.delay = delay
+            sts = SetTriggerStrategy(SID, TriggerStrategy(delay = delay, single = single, point_list = point_list))
 
             self._send_command(b"O", sts)
 
-    def get_timers(self) -> Timers:
+    def get_timers(self) -> ATR:
         """
         Return the `timers` of the last command.
 
