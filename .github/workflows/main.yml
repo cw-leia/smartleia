@@ -13,6 +13,7 @@ jobs:
       - name: test distro package
         shell: bash
         run: |
+          apt update;
           apt install smartleia;
           apt install vsmartcard-vpcd vsmartcard-vpicc;
           python -c "import smartleia";
