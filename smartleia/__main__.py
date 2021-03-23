@@ -24,10 +24,23 @@ def dfu():
 
 if __name__ == "__main__":
 
-    leia = sl.LEIA()
-    leia.configure_smartcard()
+    try:
+        leia = sl.LEIA()
+    except:
+        print("Error: are you sure that your LEIA board is connected?")
+        sys.exit(42)
 
-    leia.pcsc_relay()
+    try:
+        leia.configure_smartcard()
+    except:
+        print("Error: are you sure that a smartcard is inserted in the LEIA board?")
+        sys.exit(42)
+
+    try:
+        leia.pcsc_relay()
+    except:
+        print("Error: error in pcsc_relay, is PCSCD running? Launch in a terminal with 'pcscd -fad'")
+        sys.exit(42)
 
     code.interact(
         local=locals(),
