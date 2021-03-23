@@ -17,7 +17,7 @@ jobs:
           apt-get -y install python3;
           apt-get -y install smartleia;
           apt-get -y install vsmartcard-vpcd vsmartcard-vpicc;
-          python -c "import smartleia";
+          python3 -c "import smartleia";
   local_python_package:
     runs-on: ubuntu-latest
     strategy:
