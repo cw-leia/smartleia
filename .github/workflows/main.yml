@@ -13,8 +13,8 @@ jobs:
       - name: test distro package
         shell: bash
         run: |
-          sudo apt install smartleia;
-          sudo apt install vsmartcard-vpcd vsmartcard-vpicc;
+          apt install smartleia;
+          apt install vsmartcard-vpcd vsmartcard-vpicc;
           python -c "import smartleia";
   local_python_package:
     runs-on: ubuntu-latest
