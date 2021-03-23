@@ -14,8 +14,8 @@ jobs:
         shell: bash
         run: |
           apt-get -y update;
-          apt install smartleia;
-          apt install vsmartcard-vpcd vsmartcard-vpicc;
+          apt-get -y install smartleia;
+          apt-get -y install vsmartcard-vpcd vsmartcard-vpicc;
           python -c "import smartleia";
   local_python_package:
     runs-on: ubuntu-latest
