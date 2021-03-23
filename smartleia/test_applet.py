@@ -3,7 +3,7 @@ import sys
 
 import pytest
 
-from smartleia import APDU, LEIA
+from smartleia import APDU, LEIA, Mode
 
 STEP = 14
 
@@ -44,13 +44,26 @@ reader = LEIA(args.device)
 #: Set protoctol T=0
 @pytest.fixture(scope="function")
 def mode_t0():
-    reader.configure_smartcard(protocol_to_use=0)
+    if reader.get_mode() == Mode.BITBANG:
+        # NOTE: for Bitbang mode, due to inherent limitations, we choose
+        # a low frequency of 500 KHz as a conservative choice
+        reader.configure_smartcard(protocol_to_use=0, freq_to_use=500000)
+    else:
+        # NOTE: for T=0, we use a conservative frequency even in USART mode
+        reader.configure_smartcard(protocol_to_use=0, freq_to_use=2800000)
 
 
 #: Set protoctol T=1
 @pytest.fixture(scope="function")
 def mode_t1():
-    reader.configure_smartcard(protocol_to_use=1)
+    if reader.get_mode() == Mode.BITBANG:
+        # NOTE: for Bitbang mode, due to inherent limitations, we choose
+        # a low frequency of 500 KHz as a conservative choice
+        reader.configure_smartcard(protocol_to_use=1, freq_to_use=500000)
+    else:
+        # NOTE: for T=1 and USART mode, let the firmware decide the
+        # frequency to use
+        reader.configure_smartcard(protocol_to_use=1)
 
 
 #: Select the test applet

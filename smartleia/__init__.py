@@ -24,7 +24,7 @@ __all__ = [
     "LEIA",
 ]
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 name = "smartleia"
 
@@ -146,7 +146,7 @@ class Triggers(Enum):
         TriggerPoints.TRIG_GET_ATR_PRE,
         TriggerPoints.TRIG_GET_ATR_POST,
     ]
-    #: Triggers after the first byte of an APDU has been sent: first trig
+    # Triggers after the first byte of an APDU has been sent: first trig
     # just after we have sent our APDU command, second trig when receiving
     # the first response byte from the card.
     MULTI_TRIG_AFTER_1ST_BYTE_SEND_APDU = [
@@ -610,6 +610,32 @@ class T(IntEnum):
     #: The protocol is T=1
     T1 = 1
 
+class Mode(IntEnum):
+    """
+    ISO7816 mode selection.
+    """
+   
+    # USART mode
+    USART = 0
+
+    # Bitbang mode
+    BITBANG = 1
+
+class LEIAMode(LEIAStructure):
+    _pack_ = 1
+    _fields_ = [
+        ("mode", ctypes.c_uint8),
+    ]
+
+    def __init__(
+        self,
+        mode,
+    ):
+        LEIAStructure.__init__(
+            self,
+            mode=mode,
+        )
+
 
 class ConfigureSmartcardCommand(LEIAStructure):
     _pack_ = 1
@@ -793,6 +819,34 @@ class LEIA:
             self._testWaitingFlag()
             self.ser.timeout = 10
 
+    # Set the mode to either USART or BITBANG
+    def set_mode(self, mode: Mode):
+        if mode == Mode.USART:
+            self._send_command(b"e", LEIAMode(Mode.USART))
+        elif mode == Mode.BITBANG:
+            self._send_command(b"e", LEIAMode(Mode.BITBANG))
+        else:
+            raise Exception(
+                "Invalid mode for 'set_mode' (e) command."
+            )
+        
+    # Get the current mode
+    def get_mode(self):
+        self._send_command(b"g")
+        r_size = self._read_response_size()
+        if r_size != 1:
+            raise Exception(
+                "Invalid response size for 'get_mode' (g) command."
+            )
+        r = self.ser.read(1)
+        if r == b"\x00":
+            mode = Mode.USART
+        elif r == b"\x01":
+            mode = Mode.BITBANG
+        else:
+            mode = None
+        return mode
+
     def configure_smartcard(
         self,
         protocol_to_use: Optional[T] = None,
@@ -848,7 +902,7 @@ class LEIA:
 
             # We always try to negotiate a T=1 communication if not specifically asked otherwise
             # Fallback to auto if this is not possible!
-            if protocol_to_use == T.AUTO:
+            if (protocol_to_use == T.AUTO) and (negotiate_pts == True):
                 try:
                     struct = ConfigureSmartcardCommand(
                         T(T.T1).value + 1,
@@ -925,7 +979,7 @@ class LEIA:
 
             self._send_command(b"O", sts)
 
-    def get_timers(self) -> ATR:
+    def get_timers(self) -> Timers:
         """
         Return the `timers` of the last command.
 
@@ -977,6 +1031,7 @@ class LEIA:
 
         return True if r == b"\x01" else False
 
+    # DFU mode
     def dfu(self) -> None:
         """
         Reboot LEIA in DFU mode.
@@ -984,6 +1039,27 @@ class LEIA:
         with self.lock:
             try:
                 self._send_command(b"u")
+            except serial.SerialException:
+                pass
+
+    # AVR flasher mode
+    def flasher(self) -> None:
+        """
+        Reboot LEIA in funcard flasher mode.
+        """
+        with self.lock:
+            try:
+                self._send_command(b"f")
+            except serial.SerialException:
+                pass
+ 
+    def smartreader(self) -> None:
+        """
+        Reboot LEIA in funcard smartreader mode.
+        """
+        with self.lock:
+            try:
+                self._send_command(b"s")
             except serial.SerialException:
                 pass
 
