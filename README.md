@@ -10,59 +10,61 @@ smartcard reader. With it, you will be able to:
     - Start a [Virtual SmartCard](https://frankmorgner.github.io/vsmartcard/) 
       client to use LEIA as a real smartcard reader (through pcscd)
 
+The smartleia package should be compatible with **Python 3.6 and newer**.
+
 ## Installation
 
-### From pipy
+### From apt
+
+If you use debian or ubuntu, smartleia should be packaged (in the
+recent versions of the distros). Simply try:
 
 ```sh
-python3 -m pip install smartleia
+apt install smartleia
 ```
 
 ### From git
 
 
 You may need to use the last version of python builtin's setuptools to install
-smartleia from git
+smartleia from git:
 
 ```sh
-python3 -m pip install --upgrade pip setuptools wheel
+python -m pip install --upgrade pip setuptools wheel
 ```
 
 ```sh
 git clone https://github.com/cw-leia/smartleia
 cd smartleia
-python3 -m pip install .
+pip install --user .;
 ```
 
-## Development setup
-### Setup development environment
+## Using smartleia with PCSC
 
-
-#### 1. Install python3-venv
-
-```sh
-sudo apt install python3-venv python3-pip
-```
-
-#### 2. Install poetry
-
-```sh
-python3 -m pip install poetry
-```
-
-#### 3. Install dependencies
-
-It is time to install the dependencies and the dev dependencies of smartleia.
-All what is needed to build doc, run tests, lint or format the python files will be installed **without polluting you system python installation**.
+It is possible to use smartleia in a PCSC mode, where
+it communicates with the PCSC daemon so that you can
+use your existing tools (such as `opensc`) to communicate
+with the smartcard transparently. Using this mode will require
+the installation of `vsmartcard-vpcd` and `vsmartcard-vpicc`,
+either from the sources in the [vsmartcard](https://github.com/frankmorgner/vsmartcard)
+repository, or from your distro packages (this should be
+packaged in recent debian and ubuntu distros):
 
 
 ```sh
-poetry install
+apt install vsmartcard-vpcd vsmartcard-vpicc
 ```
 
-#### 5. (Optionnal) Install git pre-commit hooks
-
-
+Then, you can lauch PCSC daemon in a terminal:
 ```sh
-poetry run pre-commit install
+pcscd -fad
 ```
+
+And launch smartleia in PCSC relay mode:
+```sh
+python3 -m smartleia
+```
+
+Of course, you should have your LEIA (or equivalent) board
+plugged in using USB as well as a smart card present in the
+connector. PCSC should spot a new ATR if everything went fine.
