@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.com/cw-leia/smartleia.svg?branch=master)](https://travis-ci.com/cw-leia/smartleia)
-
 # SmartLeia
 
 This repository holds the source of the python package used to drive the LEIA

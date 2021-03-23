@@ -1,0 +1,29 @@
+name: leia-python-package
+
+# Run this workflow every time a new commit pushed to your repository
+on: push
+
+jobs:
+  testing:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+
+    steps:
+      # Checkout repository
+      - name: checkout repository
+        uses: actions/checkout@v2
+      # Run actions
+      - name: set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      # Install dependencies and test
+      - name: tests
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          python setup.py install
