@@ -6,6 +6,8 @@ on: push
 jobs:
   distro_package:
     runs-on: ubuntu-latest
+    # Debian sid contained, since packages are not in ubuntu yet
+    container: debian:sid
     steps:
       # Install dependencies and test
       - name: test distro package
