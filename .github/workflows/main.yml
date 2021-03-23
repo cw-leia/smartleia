@@ -14,6 +14,7 @@ jobs:
         shell: bash
         run: |
           apt-get -y update;
+          apt-get -y install python3;
           apt-get -y install smartleia;
           apt-get -y install vsmartcard-vpcd vsmartcard-vpicc;
           python -c "import smartleia";
