@@ -4,12 +4,11 @@ name: leia-python-package
 on: push
 
 jobs:
-  testing:
+  local_python_package:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
-
     steps:
       # Checkout repository
       - name: checkout repository
@@ -26,3 +25,5 @@ jobs:
           pip install pytest
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install --user .
+          # Try to import the installed package
+          python -c "import smartleia"
