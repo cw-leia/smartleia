@@ -42,4 +42,4 @@ jobs:
           # Try to import the installed package
           python -c "import smartleia";
           # Try to launch it
-          python -m smartleia || if [ $? -eq 42 ]; then echo "success"; else exit 1; fi
+          python -m smartleia || if [ $? -eq 42 ]; then echo "Success (42 is a legitimate exit code)"; else exit 1; fi
