@@ -7,9 +7,8 @@ jobs:
   distro_package:
     runs-on: ubuntu-latest
     steps:
-      - name: test distro package
       # Install dependencies and test
-      - name: tests
+      - name: test distro package
         shell: bash
         run: |
           sudo apt install smartleia;
