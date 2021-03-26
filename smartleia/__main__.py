@@ -33,8 +33,11 @@ if __name__ == "__main__":
     try:
         leia.configure_smartcard()
     except:
-        print("Error: are you sure that a smartcard is inserted in the LEIA board?")
-        sys.exit(42)
+        try:
+            leia.configure_smartcard(negotiate_pts=False)
+        except:
+            print("Error: are you sure that a smartcard is inserted in the LEIA board?")
+            sys.exit(42)
 
     try:
         leia.pcsc_relay()
