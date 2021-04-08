@@ -852,8 +852,8 @@ class LEIA:
         protocol_to_use: Optional[T] = None,
         ETU_to_use: Optional[int] = None,
         freq_to_use: Optional[int] = None,
-        negotiate_pts: Optional[bool] = True,
-        negotiate_baudrate: Optional[bool] = True,
+        negotiate_pts: Optional[bool] = None,
+        negotiate_baudrate: Optional[bool] = None,
     ):
         """Configure a smartcard connection.
 
@@ -876,6 +876,8 @@ class LEIA:
             negotiate_pts: if LEIA can try to negotiate the PTS.
             negotiate_baudrate: if LEIA can negotiate the baudrate. There is not impact if `ETU_to_use` and `freq_to_use` are set.
         """
+        if self.is_card_inserted() == False:
+            raise Exception("Error: card not inserted! Please insert a card to configure it.")
 
         with self.lock:
             self._testWaitingFlag()
@@ -897,39 +899,80 @@ class LEIA:
             if freq_to_use is None:
                 freq_to_use = 0
 
-            negotiate_pts = True if negotiate_pts else False
-            negotiate_baudrate = True if negotiate_baudrate else False
+            if negotiate_pts is None:
+                _negotiate_pts = True
+            else:
+                _negotiate_pts = negotiate_pts
+
+            if negotiate_baudrate is None:
+                _negotiate_baudrate = True
+            else:
+                _negotiate_baudrate = negotiate_baudrate
 
             # We always try to negotiate a T=1 communication if not specifically asked otherwise
             # Fallback to auto if this is not possible!
-            if (protocol_to_use == T.AUTO) and (negotiate_pts == True):
+            if (protocol_to_use == T.AUTO):
                 try:
                     struct = ConfigureSmartcardCommand(
                         T(T.T1).value + 1,
                         ETU_to_use,
                         freq_to_use,
-                        negotiate_pts,
-                        negotiate_baudrate,
+                        _negotiate_pts,
+                        _negotiate_baudrate,
                     )
                     self._send_command(b"c", struct)
                 except Exception:
+                    try:
+                        struct = ConfigureSmartcardCommand(
+                            T(T.AUTO).value + 1,
+                            ETU_to_use,
+                            freq_to_use,
+                            _negotiate_pts,
+                            _negotiate_baudrate,
+                        )
+                        self._send_command(b"c", struct)
+                    except Exception:
+                        if negotiate_pts == None:
+                            try:
+                                # If we have not been asked to specifically negotiate
+                                struct = ConfigureSmartcardCommand(
+                                    T(T.AUTO).value + 1,
+                                    ETU_to_use,
+                                    freq_to_use,
+                                    False,
+                                    _negotiate_baudrate,
+                                )
+                                self._send_command(b"c", struct)
+                            except Exception:
+                                raise Exception("Error: configure_smartcard failed with the asked parameters! Please check what your card supports (PTS, ETU, ...) and try other parameters!")
+                        else:
+                                raise Exception("Error: configure_smartcard failed with the asked parameters! Please check what your card supports (PTS, ETU, ...) and try other parameters!")
+            else:
+                try:
                     struct = ConfigureSmartcardCommand(
-                        T(T.AUTO).value + 1,
+                        _protocol_to_use,
                         ETU_to_use,
                         freq_to_use,
-                        negotiate_pts,
-                        negotiate_baudrate,
+                        _negotiate_pts,
+                        _negotiate_baudrate,
                     )
                     self._send_command(b"c", struct)
-            else:
-                struct = ConfigureSmartcardCommand(
-                    _protocol_to_use,
-                    ETU_to_use,
-                    freq_to_use,
-                    negotiate_pts,
-                    negotiate_baudrate,
-                )
-                self._send_command(b"c", struct)
+                except Exception:
+                    if negotiate_pts == None:
+                        try:
+                            # If we have not been asked to specifically negotiate
+                            struct = ConfigureSmartcardCommand(
+                                _protocol_to_use,
+                                ETU_to_use,
+                                freq_to_use,
+                                False,
+                                _negotiate_baudrate,
+                            )
+                            self._send_command(b"c", struct)
+                        except Exception:
+                            raise Exception("Error: configure_smartcard failed with the asked parameters! Please check what your card supports (PTS, ETU, ...) and try other parameters!")
+                    else:
+                        raise Exception("Error: configure_smartcard failed with the asked parameters! Please check what your card supports (PTS, ETU, ...) and try other parameters!")
 
     def get_trigger_strategy(self, SID: int) -> TriggerStrategy:
         """
